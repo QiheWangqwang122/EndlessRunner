@@ -2,9 +2,9 @@ class PixelPlayer extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, texture, keys,frame) {
         super(scene, x, y, texture, frame);
 
-        // Since this is already a Physics Sprite, we don't need to add it to the scene's physics system.
-        // However, we still need to add it to the scene to display it.
+ 
         scene.add.existing(this);
+        scene.physics.world.enable(this); // Add to the physics worldÍ
         
         // Set the player to collide with the bounds of the world.
         //this.setCollideWorldBounds(true);
@@ -22,9 +22,9 @@ class PixelPlayer extends Phaser.Physics.Arcade.Sprite {
     update() {
         // Apply gravity manually if not using an Arcade Physics body
         // This is a simple way to simulate gravity if your character is floating
-        //console.log(this.keyUP);
+        
         if (!this.body.onFloor()) {
-            this.y += 4; // This number controls the fall speed, adjust as needed
+            this.y += 4; // This number controls the faÍll speed, adjust as needed
         }
     
         // Moving Left

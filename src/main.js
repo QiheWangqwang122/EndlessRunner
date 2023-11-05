@@ -13,4 +13,7 @@ const config = {
   };
   
   const game = new Phaser.Game(config);
-  let keyLeft,keyRight,keyUP,keyDuck;
+  let level;
+  let highScore;
+  let newHighScore = false;
+  let cursors;
