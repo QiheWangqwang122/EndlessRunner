@@ -1,6 +1,7 @@
 class Play extends Phaser.Scene {
     constructor() {
         super('playScene');
+        this.survivalTime = 0;
     }
 
     preload() {
@@ -17,15 +18,16 @@ class Play extends Phaser.Scene {
     create() {
         // Create the ground, making it static so it doesn't move
         const ground = this.physics.add.staticGroup();
-        this.ladder = new Ladder(this, 200, 300, 'ladder');
+        //this.ladder = new Ladder(this, 200, 300, 'ladder');
         ground.create(400, 568, 'ground').setScale(2).refreshBody();
+        this.GameOver = false;
         this.ladderSpeed = 100; // Initial speed of ladders
         this.ladderCount = 0; 
         // Create the player animations using the loaded spritesheet
         this.anims.create({
             key: 'run',
             frames: this.anims.generateFrameNumbers('player', { start: 0, end: 4 }),
-            frameRate: 5,// framerates
+            frameRate: 10,// framerates
             repeat: -1
         });
         //============================cloud & stars=======================
@@ -63,9 +65,24 @@ class Play extends Phaser.Scene {
     
         //============================cloud & stars ======================
 
+        //===============GameOverEvent==============
+        this.timerText = this.add.text(16, this.sys.game.config.height / 2, 'Countdown: 30', {
+            fontSize: '32px',
+            fill: '#fff'
+        });
+        if(!this.GameOver)
+        {
+            this.time.addEvent({
+                delay: 1000,
+                callback: this.updateCountdown,
+                callbackScope: this,
+                loop: true
+            });
+        }
+
         //TVmonster=========================
         this.spawnLadderTimer = this.time.addEvent({
-            delay: 2000,                // Spawn a ladder every 2000ms
+            delay: 3000,                // Spawn a ladder every 2000ms
             callback: this.spawnLadder, // the function to call
             callbackScope: this,        // scope to the Play scene
             loop: true                  // run this indefinitely
@@ -104,12 +121,14 @@ class Play extends Phaser.Scene {
 
 
     }
-
+    
     update() {
         // Player movement logic
+        //console.log(this.ladderSpeed);
+        this.pixelPlayer.anims.play('run', true);
         if (this.cursors.left.isDown) {
             this.pixelPlayer.setVelocityX(-160);
-            this.pixelPlayer.anims.play('run', true);
+  
             this.pixelPlayer.flipX = true; // Flip the sprite to the left
         } else if (this.cursors.right.isDown) {
             this.pixelPlayer.setVelocityX(160);
@@ -131,7 +150,7 @@ class Play extends Phaser.Scene {
         //==============================cloud stars
 
         if (this.cursors.up.isDown && this.pixelPlayer.body.touching.down) {
-            this.pixelPlayer.setVelocityY(-330);
+            this.pixelPlayer.setVelocityY(-300);
         }
 
 
@@ -139,31 +158,39 @@ class Play extends Phaser.Scene {
         // Increase the speed of the ladders and possibly spawn more
 
     }
+    updateTimer() {
+        this.survivalTime += 1; // Increment the survival time by 1 second
+        let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore'), 10) : 0;
+
+        // Update the timer text to reflect the new survival time
+        this.timerText.setText('Survived: ' + this.survivalTime + 's');
+
+        // Check if the current survival time is greater than the high score
+        if (this.survivalTime > highScore) {
+            highScore = this.survivalTime;
+            localStorage.setItem('highScore', highScore.toString()); // Store the new high score
+            this.highScoreText.setText('High Score: ' + highScore + 's');
+        }
+    }
     spawnLadder() {
         // Decide whether to spawn a ladder based on player activity
-        if (this.pixelPlayer.body.touching.down || this.cursors.up.isDown) {
-            // Set the ladder to appear at the player's height
-            let ladderY = this.pixelPlayer.y;
+        level ++;
+        if(level %5 == 0)
+        {
+            this.ladderSpeed -= 15;
 
-            // Choose to spawn the ladder on the right side off-screen
-            let ladderX = this.scale.width + 50;  // Spawn just off screen to the right
-
-            // Create a new Ladder instance
-            let ladder = new Ladder(this, ladderX, ladderY, 'ladder');
-            ladder.body.setVelocityX(-this.ladderSpeed); // Ladder should move left towards the player
-            
-            // Add the newly created ladder to the ladders group
-            this.ladders.add(ladder);
-
-            // Handle collision with the ladder
-            this.physics.add.collider(this.pixelPlayer, ladder, this.hitLadder, null, this);
-
-            // Optionally increase the ladder count to make the game harder over time
-            this.ladderCount++;
-            if (this.ladderCount % 5 === 0) {
-                this.ladderSpeed += 20;  // Increase the ladder speed after every 5 ladders
-            }
         }
+        //let ladderX = this.pixelPlayer.x; // X position where the player is standing
+        let ladderY = this.pixelPlayer.y; // Y position where the player is standing
+    
+        let ladder = this.ladders.create(this.sys.game.config.width, ladderY, 'ladder');
+        ladder.body.setVelocityX(-this.ladderSpeed); // Move the ladder towards the left
+    
+        // Set ladder to not move down due to gravity
+        ladder.body.setAllowGravity(false);
+    
+        // Check collision with the ladder
+        this.physics.add.collider(this.pixelPlayer, ladder, this.checkGameOver, null, this);
     }
     spawnStar() {
         let y = Phaser.Math.Between(0, this.sys.game.config.height);
@@ -187,14 +214,20 @@ class Play extends Phaser.Scene {
             cloud.destroy(); // Or some other interaction
         });
     }
-    hitLadder(player, ladder) {
-        // Player hit the ladder, perform any necessary logic such as ending the game
-        // For example: this.scene.start('GameOver', { score: this.playerScore });
-        // Or, you could just remove the ladder and reduce player health or points
-        ladder.destroy();
-        // Reduce player health or points
-        // this.playerHealth -= 10;
+    checkGameOver(player, ladder) {
+        // Stop all movements
+        this.physics.pause();
+        player.setTint(0xff0000); // Optionally tint the player red to indicate damage
+    
+        // Stop the player's animations
+        player.anims.stop();
+        this.GameOver = true;
+        // Transition to the Game Over scene after a short delay
+        this.time.delayedCall(1000, () => {
+            this.scene.start('GameOverscene'); // Replace 'gameOverScene' with your actual game over scene key
+        }, [], this);
     }
+    
     
     
 }

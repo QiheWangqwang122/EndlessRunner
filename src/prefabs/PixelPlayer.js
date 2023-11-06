@@ -15,7 +15,7 @@ class PixelPlayer extends Phaser.Physics.Arcade.Sprite {
         this.keyUP = keys.keyUP;
         //this.physics.add.sprite(x, y, 'spriteKey');
         // Player properties
-        this.jumpSpeed = -300; // The speed at which the player will move up
+        this.jumpSpeed = -200; // The speed at which the player will move up
         this.moveSpeed = 150; // The speed for moving left or right
     }
 

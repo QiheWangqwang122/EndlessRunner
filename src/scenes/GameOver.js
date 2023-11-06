@@ -1,6 +1,6 @@
 class GameOver extends Phaser.Scene {
     constructor() {
-        super('GameOver');
+        super('GameOverscene');
     }
 
     init(data) {
@@ -10,7 +10,7 @@ class GameOver extends Phaser.Scene {
 
     create() {
         // Check for high score in local storage
-        this.highScore = this.sys.game.registry.get('highScore') || 0;
+        this.highScore = this.sys.game.registry.get(highScore) || 0;
         if (this.playerScore > this.highScore) {
             this.highScore = this.playerScore;
             this.sys.game.registry.set('highScore', this.highScore);
@@ -31,7 +31,7 @@ class GameOver extends Phaser.Scene {
 
         // Set up the "R" key to restart the game
         this.input.keyboard.on('keydown-R', () => {
-            this.scene.start('Menu'); // Assuming 'Menu' is the name of your menu scene
+            this.scene.start('menuScene'); // Assuming 'Menu' is the name of your menu scene
         });
     }
 }
