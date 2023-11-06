@@ -1,3 +1,5 @@
+
+'use strict';
 const config = {
     type: Phaser.AUTO,
     width: 800,
@@ -9,7 +11,7 @@ const config = {
         debug: false
       }
     },
-    scene: [Menu, Play] // assuming you have a Menu scene as well
+    scene: [Menu, Play, GameOver]  // assuming you have a Menu scene as well
   };
   
   const game = new Phaser.Game(config);
