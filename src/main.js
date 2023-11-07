@@ -16,6 +16,6 @@ const config = {
   
   const game = new Phaser.Game(config);
   let level;
-  let highScore = 0 ;
   let newHighScore = false;
+  let highScoreText ;
   let cursors;

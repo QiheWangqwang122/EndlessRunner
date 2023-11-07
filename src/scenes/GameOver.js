@@ -10,7 +10,7 @@ class GameOver extends Phaser.Scene {
 
     create() {
         // Check for high score in local storage
-        this.highScore = this.sys.game.registry.get(highScore) || 0;
+        this.highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore'), 10) : 0;
         if (this.playerScore > this.highScore) {
             this.highScore = this.playerScore;
             this.sys.game.registry.set('highScore', this.highScore);

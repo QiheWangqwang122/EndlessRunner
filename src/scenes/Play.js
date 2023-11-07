@@ -5,7 +5,7 @@ class Play extends Phaser.Scene {
     }
 
     preload() {
-        // Assuming 'player' is a spritesheet with frames for running animation
+
         this.load.spritesheet('player', './assets/PlayerRunning.png', { frameWidth: 32, frameHeight: 64 });
         // Load an image asset to represent the ground
         this.load.image('ground', './assets/Ground.png');
@@ -18,6 +18,7 @@ class Play extends Phaser.Scene {
     create() {
         // Create the ground, making it static so it doesn't move
         const ground = this.physics.add.staticGroup();
+
         //this.ladder = new Ladder(this, 200, 300, 'ladder');
         ground.create(400, 568, 'ground').setScale(2).refreshBody();
         this.GameOver = false;
@@ -37,17 +38,14 @@ class Play extends Phaser.Scene {
             repeat: 1000,
             setXY: { x: config.width, y: 0, stepX: Phaser.Math.Between(100, 500), stepY: Phaser.Math.Between(20, config.height) }
         });
-    
-        // Set velocity and disable gravity for each star
+
         this.stars.children.iterate(function (star) {
             star.body.setAllowGravity(false);
             star.setVelocityX(-Phaser.Math.Between(100, 500));
         });
 
     
-        // Create a group for clouds similarly
-        
-        // Set up a timer event for spawning stars
+
         this.time.addEvent({
             delay: 100, // Spawn a star every 100ms
             callback: this.spawnStar,
@@ -107,13 +105,8 @@ class Play extends Phaser.Scene {
         this.lastLadderY = this.scale.height;
 
 
-        // Set up a timed event to call spawnLadder periodically
-        this.time.addEvent({
-            delay: 2000,                // run the callback every 2000ms
-            //callback: this.spawnLadder, // the function to call
-            callbackScope: this,        // scope to the Play scene
-            loop: true                  // run this indefinitely
-        });
+
+
         this.ladders = this.physics.add.group({
             allowGravity: false,
             immovable: true
@@ -125,6 +118,7 @@ class Play extends Phaser.Scene {
     update() {
         // Player movement logic
         //console.log(this.ladderSpeed);
+        
         this.pixelPlayer.anims.play('run', true);
         if (this.cursors.left.isDown) {
             this.pixelPlayer.setVelocityX(-160);
@@ -158,7 +152,8 @@ class Play extends Phaser.Scene {
         // Increase the speed of the ladders and possibly spawn more
 
     }
-    updateTimer() {
+    updateCountdown() {
+
         this.survivalTime += 1; // Increment the survival time by 1 second
         let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore'), 10) : 0;
 
@@ -167,16 +162,16 @@ class Play extends Phaser.Scene {
 
         // Check if the current survival time is greater than the high score
         if (this.survivalTime > highScore) {
-            highScore = this.survivalTime;
-            localStorage.setItem('highScore', highScore.toString()); // Store the new high score
-            this.highScoreText.setText('High Score: ' + highScore + 's');
+            console.log(this.survivalTime,highScore);
+            localStorage.setItem('highScore', this.survivalTime.toString()); // Store the new high score
         }
     }
     spawnLadder() {
         // Decide whether to spawn a ladder based on player activity
         level ++;
-        if(level %5 == 0)
+        if(level %3 == 0)
         {
+            console.log(this.ladderSpeed);
             this.ladderSpeed -= 15;
 
         }
