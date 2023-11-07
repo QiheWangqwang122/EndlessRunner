@@ -18,7 +18,7 @@ class GameOver extends Phaser.Scene {
         }
 
         // Add Game Over text
-        this.add.text(400, 300, 'GAME OVER', { fontSize: '64px', fill: '#fff' })
+        this.add.text(400, 200, 'GAME OVER', { fontSize: '64px', fill: '#fff' })
             .setOrigin(0.5, 0.5);
 
         // Display High Score
@@ -28,6 +28,16 @@ class GameOver extends Phaser.Scene {
         // Instructions to restart
         this.add.text(400, 450, 'Press "R" to Restart', { fontSize: '24px', fill: '#fff' })
             .setOrigin(0.5, 0.5);
+        try{
+           let survivalTime = sessionStorage.getItem('survivalTime')
+            // Display Survive Time
+            this.add.text(400, 300, `Survival Time: ${survivalTime}`, { fontSize: '32px', fill: '#fff' })
+                .setOrigin(0.5, 0.5);
+        }catch (e) {
+
+        }
+
+
 
         // Set up the "R" key to restart the game
         this.input.keyboard.on('keydown-R', () => {

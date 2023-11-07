@@ -1,3 +1,4 @@
+
 class Menu extends Phaser.Scene {
     constructor() {
       super('menuScene');
@@ -63,8 +64,12 @@ class Menu extends Phaser.Scene {
       // Select option
       if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
         if (this.currentSelection === 0) {
+            this.scene.manager.scenes[1].survivalTime = 0
           // Start the game
           this.scene.start('playScene');
+            // clear last score
+
+
         } else {
           // Show how to play
           this.scene.start('describeScene');

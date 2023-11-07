@@ -12,7 +12,8 @@ class Play extends Phaser.Scene {
         this.load.image('ladder', './assets/ladder.png');
         this.load.image('star', './assets/stars.png');
         this.load.image('cloud','./assets/cloud.png');
-        
+        this.load.image('ground_physic','./assets/ground2.png');
+        this.load.spritesheet('ground_pit_random','./assets/pit.png',{frameWidth:50, frameHeight: 40})
     }
 
     create() {
@@ -20,9 +21,14 @@ class Play extends Phaser.Scene {
         const ground = this.physics.add.staticGroup();
 
         //this.ladder = new Ladder(this, 200, 300, 'ladder');
-        ground.create(400, 568, 'ground').setScale(2).refreshBody();
+        ground.create(400, 588, 'ground_physic').setScale(2).refreshBody();
+
+        // background ground, not physic
+        this.bg_ground = this.add.tileSprite(0,568,1600,80,'ground')
+        // this. bg_ground.setOrigin(0,600)
         this.GameOver = false;
         this.ladderSpeed = 100; // Initial speed of ladders
+        this.pitMoveSpeed = 100
         this.ladderCount = 0; 
         // Create the player animations using the loaded spritesheet
         this.anims.create({
@@ -60,7 +66,7 @@ class Play extends Phaser.Scene {
             callbackScope: this,
             loop: true
         });
-    
+
         //============================cloud & stars ======================
 
         //===============GameOverEvent==============
@@ -80,7 +86,7 @@ class Play extends Phaser.Scene {
 
         //TVmonster=========================
         this.spawnLadderTimer = this.time.addEvent({
-            delay: 3000,                // Spawn a ladder every 2000ms
+            delay: 2000,                // Spawn a ladder every 2000ms
             callback: this.spawnLadder, // the function to call
             callbackScope: this,        // scope to the Play scene
             loop: true                  // run this indefinitely
@@ -114,7 +120,7 @@ class Play extends Phaser.Scene {
 
 
     }
-    
+
     update() {
         // Player movement logic
         //console.log(this.ladderSpeed);
@@ -134,8 +140,8 @@ class Play extends Phaser.Scene {
             // this.pixelPlayer.anims.play('stand');
         }
         //==============================cloud stars
+this.bg_ground.tilePositionX +=0.5
 
- 
         // Optionally spawn new stars and clouds at random intervals
         // ... your existing spawn code ...
     
@@ -156,7 +162,7 @@ class Play extends Phaser.Scene {
 
         this.survivalTime += 1; // Increment the survival time by 1 second
         let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore'), 10) : 0;
-
+        sessionStorage.setItem('survivalTime',this.survivalTime)
         // Update the timer text to reflect the new survival time
         this.timerText.setText('Survived: ' + this.survivalTime + 's');
 
@@ -166,26 +172,80 @@ class Play extends Phaser.Scene {
             localStorage.setItem('highScore', this.survivalTime.toString()); // Store the new high score
         }
     }
+
+
+    created_arr = []
+    level = 1
     spawnLadder() {
         // Decide whether to spawn a ladder based on player activity
-        level ++;
-        if(level %3 == 0)
-        {
-            console.log(this.ladderSpeed);
-            this.ladderSpeed -= 15;
+        // level ++;
+        // if(level %3 == 0)
+        // {
+        //     console.log(this.ladderSpeed);
+        //     this.ladderSpeed -= 15;
+        //
+        // }
 
-        }
         //let ladderX = this.pixelPlayer.x; // X position where the player is standing
         let ladderY = this.pixelPlayer.y; // Y position where the player is standing
-    
-        let ladder = this.ladders.create(this.sys.game.config.width, ladderY, 'ladder');
-        ladder.body.setVelocityX(-this.ladderSpeed); // Move the ladder towards the left
-    
-        // Set ladder to not move down due to gravity
-        ladder.body.setAllowGravity(false);
-    
-        // Check collision with the ladder
-        this.physics.add.collider(this.pixelPlayer, ladder, this.checkGameOver, null, this);
+
+        // generate a delay random time for generate ladder
+        let ladderRandomTime =  Math.ceil(Math.random()*10) *1000
+        // add ladder
+        let pitRandomTime =  Math.ceil(Math.random()*10) *1000
+
+        // !!! make sure that in one second, there won't appear multiple enemy(ladder,pit)
+        let nowTime = parseInt(this.survivalTime)*1000
+        // level up each 10 second
+        if (nowTime>this.level*10000){
+            this.level++
+            this.ladderSpeed += 15;
+            console.log('level up! '+this.level)
+        }
+        // console.log('this. created_arr',this. created_arr,this.created_arr.find(i=>i == nowTime + ladderRandomTime))
+        if(this.created_arr.find(i=>i == nowTime + ladderRandomTime)){
+            return;
+        }
+        this.created_arr.push(nowTime + ladderRandomTime)
+        setTimeout(_=>{
+            try{
+                let ladder = this.ladders.create(this.sys.game.config.width, ladderY, 'ladder');
+                ladder.body.setVelocityX(-this.ladderSpeed); // Move the ladder towards the left
+
+                // Set ladder to not move down due to gravity
+                ladder.body.setAllowGravity(false);
+
+                // Check collision with the ladder
+                this.physics.add.collider(this.pixelPlayer, ladder, this.checkGameOver, null, this);
+
+
+            }catch (e) {
+                // random generate err, it may happen when game over
+            }
+
+        },ladderRandomTime)
+        // if had ladder here , not generate pit
+        if(ladderRandomTime === pitRandomTime){
+        return;
+        }
+        if(this.created_arr.find(i=>i == nowTime + pitRandomTime)){
+            return;
+        }
+       this. created_arr.push(nowTime + pitRandomTime)
+        setTimeout(_=>{
+            try{
+                // random add ground pit
+                const ground_pit_random = this.ladders.create(this.sys.game.config.width, 510, 'ground_pit_random');
+                ground_pit_random.body.setVelocityX(-this.pitMoveSpeed); // Move the pit towards the left
+                ground_pit_random.body.setAllowGravity(false);
+                //this.ladder = new Ladder(this, 200, 300, 'ladder');
+                this.physics.add.collider(this.pixelPlayer, ladder, this.checkGameOver, null, this);
+            }catch (e) {
+                // random generate err, it may happen when game over
+            }
+
+        },pitRandomTime)
+
     }
     spawnStar() {
         let y = Phaser.Math.Between(0, this.sys.game.config.height);
