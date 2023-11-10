@@ -11,6 +11,7 @@ class Play extends Phaser.Scene {
         this.load.image('ground', './assets/Ground.png');
         this.load.image('ladder', './assets/ladder.png');
         this.load.image('star', './assets/stars.png');
+        this.load.audio('bgm', './assets/bgm.wav')
         this.load.image('cloud', './assets/cloud.png');
         this.load.image('ground_physic', './assets/ground2.png');
         this.load.spritesheet('ground_pit_random', './assets/pit.png', {frameWidth: 50, frameHeight: 40})
@@ -21,7 +22,8 @@ class Play extends Phaser.Scene {
     create() {
         // Create the ground, making it static so it doesn't move
         const ground = this.physics.add.staticGroup();
-
+        this.bgm = this.sound.add('bgm', { volume: 0.5, loop: true });
+        this.bgm.play();
         //this.ladder = new Ladder(this, 200, 300, 'ladder');
         ground.create(400, 588, 'ground_physic').setScale(2).refreshBody();
 
@@ -298,6 +300,9 @@ class Play extends Phaser.Scene {
         this.time.delayedCall(1000, () => {
             this.scene.start('GameOverscene'); // Replace 'gameOverScene' with your actual game over scene key
         }, [], this);
+        if (this.bgm) {
+            this.bgm.stop();
+        }
     }
 
 

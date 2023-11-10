@@ -1,3 +1,12 @@
+/******
+ * First Name : Qihe(Jason)
+ * Last Name : Wang
+ * Hours : 40 (TO MUCH BUGSSSSSSSSSSSSSSSSSSSS)
+ * Credit example 1
+ * Background music from PlayOnLoop.com
+ * Licensed under Creative Commons by Attribution 4.0
+ * 
+ */
 
 'use strict';
 const config = {
@@ -11,7 +20,7 @@ const config = {
         debug: false
       }
     },
-    scene: [Menu, Play, GameOver]  // assuming you have a Menu scene as well
+    scene: [Menu,Play,GameOver,GameDescribe]  // assuming you have a Menu scene as well
   };
   
   const game = new Phaser.Game(config);
